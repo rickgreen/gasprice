@@ -1,0 +1,47 @@
+{
+  "name": "gasprice",
+  "version": "1.0.0",
+  "description": "Dutch fuel price visualization using CBS open data",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "NODE_OPTIONS='--experimental-vm-modules' jest --coverage --coverageThreshold='{\"global\":{\"lines\":80}}'",
+    "test:watch": "jest --watch",
+    "lint": "eslint js/**/*.js",
+    "lint:fix": "eslint js/**/*.js --fix",
+    "format": "prettier --write '**/*.{js,json,css,html,md}'",
+    "format:check": "prettier --check '**/*.{js,json,css,html,md}'",
+    "audit:security": "better-npm-audit audit --level moderate",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.js": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,css,html,md}": [
+      "prettier --write"
+    ]
+  },
+  "keywords": [
+    "fuel-prices",
+    "cbs",
+    "d3",
+    "visualization"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "better-npm-audit": "^3.11.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-jsdoc": "^50.6.3",
+    "husky": "^9.1.7",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "lint-staged": "^15.4.3",
+    "prettier": "^3.4.2"
+  },
+  "dependencies": {
+    "idb": "^8.0.2"
+  }
+}

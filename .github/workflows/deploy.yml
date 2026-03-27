@@ -1,0 +1,69 @@
+name: Deploy naar Hetzner
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  lint-test-security:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npx eslint js/**/*.js
+
+      - name: Format check
+        run: npx prettier --check '**/*.{js,json,css,html,md}'
+
+      - name: Unit tests with coverage
+        run: npm test
+
+      - name: Security audit
+        run: npx better-npm-audit audit --level moderate
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: lint-test-security
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # SSH private key klaarzetten
+      - name: SSH key instellen
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_deploy
+          chmod 600 ~/.ssh/id_deploy
+          ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts
+
+      # Bestanden deployen via rsync
+      - name: Deploy via rsync
+        run: |
+          rsync -avz --delete \
+            --exclude '.git' \
+            --exclude '.github' \
+            --exclude 'node_modules' \
+            --exclude 'coverage' \
+            --exclude 'tests' \
+            --exclude '.env' \
+            -e "ssh -i ~/.ssh/id_deploy -o StrictHostKeyChecking=no" \
+            ./ \
+            ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:${{ secrets.VPS_PATH }}/
+
+      - name: SSH key opruimen
+        if: always()
+        run: rm -f ~/.ssh/id_deploy

@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Brandstofprijzen Nederland</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <script src="https://d3js.org/d3.v7.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/idb@8/build/umd.js" defer></script>
+    <script type="module" src="js/app.js" defer></script>
+  </head>
+  <body>
+    <header>
+      <h1>Brandstofprijzen Nederland</h1>
+      <p class="subtitle">Dagelijkse prijzen sinds 2006 &mdash; bron: CBS StatLine</p>
+    </header>
+
+    <main>
+      <!-- Loader overlay -->
+      <div id="loader" class="loader">
+        <div class="loader-content">
+          <div class="spinner"></div>
+          <p id="loader-text">Data ophalen...</p>
+        </div>
+      </div>
+
+      <!-- Price cards -->
+      <section id="price-cards" class="price-cards hidden">
+        <div class="price-card euro95">
+          <h3>Euro 95</h3>
+          <span class="price" id="price-euro95">&mdash;</span>
+          <span class="unit">&euro;/liter</span>
+        </div>
+        <div class="price-card diesel">
+          <h3>Diesel</h3>
+          <span class="price" id="price-diesel">&mdash;</span>
+          <span class="unit">&euro;/liter</span>
+        </div>
+        <div class="price-card lpg">
+          <h3>LPG</h3>
+          <span class="price" id="price-lpg">&mdash;</span>
+          <span class="unit">&euro;/liter</span>
+        </div>
+      </section>
+
+      <!-- Fuel toggles -->
+      <section id="fuel-toggles" class="fuel-toggles hidden">
+        <label class="toggle euro95">
+          <input type="checkbox" data-fuel="euro95" checked />
+          <span>Euro 95</span>
+        </label>
+        <label class="toggle diesel">
+          <input type="checkbox" data-fuel="diesel" checked />
+          <span>Diesel</span>
+        </label>
+        <label class="toggle lpg">
+          <input type="checkbox" data-fuel="lpg" checked />
+          <span>LPG</span>
+        </label>
+      </section>
+
+      <!-- Main chart -->
+      <section id="chart-container" class="chart-container hidden">
+        <div id="main-chart"></div>
+      </section>
+
+      <!-- Navigator (mini overview) -->
+      <section id="navigator-container" class="navigator-container hidden">
+        <div id="navigator-chart"></div>
+      </section>
+    </main>
+
+    <footer>
+      <p>
+        Data: <a href="https://opendata.cbs.nl" target="_blank" rel="noopener">CBS Open Data</a>
+        (tabel 80416NED) &mdash; CC BY 4.0
+      </p>
+    </footer>
+  </body>
+</html>
