@@ -1,0 +1,20 @@
+---
+# Verifies that unattended-upgrades is enabled (standard on Ubuntu 24.04).
+# Does not reinstall — only asserts the expected state.
+
+- name: Check if unattended-upgrades service is enabled
+  ansible.builtin.command: systemctl is-enabled unattended-upgrades
+  register: unattended_status
+  changed_when: false
+  failed_when: false
+  tags: hardening
+
+- name: Assert unattended-upgrades is enabled
+  ansible.builtin.assert:
+    that:
+      - unattended_status.stdout == "enabled"
+    fail_msg: >-
+      unattended-upgrades is NOT enabled on this server.
+      Run: apt install -y unattended-upgrades && dpkg-reconfigure -plow unattended-upgrades
+    success_msg: "unattended-upgrades is enabled — automatic security updates active"
+  tags: hardening

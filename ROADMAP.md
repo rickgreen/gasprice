@@ -89,6 +89,10 @@ elk hun eigen subdomain en Nginx vhost op dezelfde machine.
 - [x] `ansible/roles/deploy_user/` - deploy-gebruiker, SSH key, webroot
 - [x] `ansible/vars/gasprice.yml` - variabelen (domain, webroot, deploy_user, certbot_email)
 - [x] `ansible/ansible.cfg` - defaults
+- [x] `ansible/roles/ufw/` - UFW firewall: deny inbound, allow 22/80/443 (tag: firewall)
+- [x] `ansible/roles/fail2ban/` - SSH + Nginx jails via jail.local template (tag: fail2ban)
+- [x] `ansible/roles/hardening/` - Assert unattended-upgrades enabled (tag: hardening)
+- [x] Role-volgorde in site.yml: ufw → fail2ban → hardening → deploy_user → nginx → certbot
 - ~~`.github/workflows/configure.yml`~~ — bewust niet: CLI-only (zie DECISIONS.md)
 
 ### SSL en HSTS - hoe het werkt

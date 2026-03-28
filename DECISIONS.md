@@ -68,3 +68,30 @@ configuratie (vhosts, webroots, deploy users) wordt door Ansible geregeld.
 **Motivatie:** Toekomstige projecten kunnen hun eigen subdomain en Nginx vhost krijgen
 op dezelfde VPS, zonder de Terraform-configuratie te wijzigen. Dit scheidt de
 infrastructuurlaag (machine bestaat) van de configuratielaag (machine doet iets).
+
+---
+
+## 2026-03-28 - Fail2Ban: jail.local boven jail.conf
+
+**Keuze:** Alle Fail2Ban configuratie staat in `/etc/fail2ban/jail.local`, beheerd via
+een Ansible template. Het bestand `jail.conf` wordt nooit aangepast.
+
+**Motivatie:** `jail.conf` is eigendom van het Fail2Ban-pakket. Bij een `apt upgrade`
+wordt dit bestand overschreven door de package maintainer. Aanpassingen in `jail.conf`
+gaan dan stilzwijgend verloren — of dpkg vraagt interactief welke versie bewaard moet
+worden, wat onbeheerde servers blokkeert. `jail.local` wordt automatisch geladen als
+override en wordt nooit aangeraakt door pakketbeheer. Dit is de door Fail2Ban
+[gedocumenteerde aanpak](https://github.com/fail2ban/fail2ban/wiki/Proper-fail2ban-configuration).
+
+---
+
+## 2026-03-28 - Unattended-upgrades: alleen verificatie, geen installatie
+
+**Keuze:** De Ansible `hardening` role installeert unattended-upgrades niet, maar
+verifieert alleen dat de service enabled is via `systemctl is-enabled`.
+
+**Motivatie:** Ubuntu 24.04 heeft unattended-upgrades standaard geïnstalleerd en
+ingeschakeld. Opnieuw installeren of configureren brengt het risico dat defaults
+overschreven worden met een eigen configuratie die vervolgens onderhouden moet worden.
+Een assert-task vangt het onverwachte geval dat de service uitgeschakeld is, zonder
+onnodige wijzigingen aan te brengen.

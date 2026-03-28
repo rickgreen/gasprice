@@ -1,0 +1,32 @@
+# Managed by Ansible — do not edit manually on the server.
+# All overrides go here; jail.conf is left untouched so package
+# upgrades never silently revert security settings.
+
+[DEFAULT]
+# Ban for 1 hour
+bantime  = 3600
+# Observation window: 10 minutes
+findtime = 600
+# Ban after 5 failed attempts
+maxretry = 5
+
+# ── SSH ──────────────────────────────────────────────────
+[sshd]
+enabled  = true
+port     = ssh
+backend  = systemd
+
+# ── Nginx HTTP auth brute-force ──────────────────────────
+[nginx-http-auth]
+enabled  = true
+port     = http,https
+logpath  = /var/log/nginx/error.log
+
+# ── Nginx bot / scanner blocking ────────────────────────
+# Catches repeated 4xx errors from scanners probing for
+# vulnerable paths (wp-login, .env, phpMyAdmin, etc.)
+[nginx-botsearch]
+enabled  = true
+port     = http,https
+logpath  = /var/log/nginx/access.log
+maxretry = 5

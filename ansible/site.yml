@@ -4,7 +4,9 @@
 # Usage:
 #   ansible-playbook -i inventory.yml site.yml
 #
-# To run only SSL (after DNS propagation):
+# Selective runs:
+#   ansible-playbook -i inventory.yml site.yml --tags firewall
+#   ansible-playbook -i inventory.yml site.yml --tags fail2ban
 #   ansible-playbook -i inventory.yml site.yml --tags ssl
 
 - name: Configure gasprice VPS
@@ -15,6 +17,11 @@
     - vars/gasprice.yml
 
   roles:
+    # Base security first
+    - ufw
+    - fail2ban
+    - hardening
+    # Then application setup
     - deploy_user
     - nginx
     - certbot
