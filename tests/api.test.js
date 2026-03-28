@@ -14,7 +14,7 @@ import {
 describe('api.js', () => {
   describe('parseObservation', () => {
     it('should parse a valid Euro 95 observation', () => {
-      const obs = { Perioden: '20240115', Measure: 'BenzineEuro95_1', Value: 1.954 };
+      const obs = { Perioden: '20240115', Measure: 'A047220', Value: 1.954 };
       const result = parseObservation(obs);
       expect(result).toEqual({
         id: '20240115_euro95',
@@ -25,7 +25,7 @@ describe('api.js', () => {
     });
 
     it('should parse a valid Diesel observation', () => {
-      const obs = { Perioden: '20240115', Measure: 'Diesel_2', Value: 1.823 };
+      const obs = { Perioden: '20240115', Measure: 'A047219', Value: 1.823 };
       const result = parseObservation(obs);
       expect(result).toEqual({
         id: '20240115_diesel',
@@ -36,7 +36,7 @@ describe('api.js', () => {
     });
 
     it('should parse a valid LPG observation', () => {
-      const obs = { Perioden: '20240115', Measure: 'Lpg_3', Value: 0.742 };
+      const obs = { Perioden: '20240115', Measure: 'A047221', Value: 0.742 };
       const result = parseObservation(obs);
       expect(result).toEqual({
         id: '20240115_lpg',
@@ -51,7 +51,7 @@ describe('api.js', () => {
     });
 
     it('should return null for missing Perioden', () => {
-      expect(parseObservation({ Measure: 'Diesel_2', Value: 1.5 })).toBeNull();
+      expect(parseObservation({ Measure: 'A047219', Value: 1.5 })).toBeNull();
     });
 
     it('should return null for missing Measure', () => {
@@ -60,18 +60,16 @@ describe('api.js', () => {
 
     it('should return null for null Value', () => {
       expect(
-        parseObservation({ Perioden: '20240115', Measure: 'Diesel_2', Value: null }),
+        parseObservation({ Perioden: '20240115', Measure: 'A047219', Value: null }),
       ).toBeNull();
     });
 
     it('should return null for unknown measure code', () => {
-      expect(
-        parseObservation({ Perioden: '20240115', Measure: 'Unknown_99', Value: 1.5 }),
-      ).toBeNull();
+      expect(parseObservation({ Perioden: '20240115', Measure: 'X999999', Value: 1.5 })).toBeNull();
     });
 
     it('should accept zero price value', () => {
-      const obs = { Perioden: '20240115', Measure: 'Lpg_3', Value: 0 };
+      const obs = { Perioden: '20240115', Measure: 'A047221', Value: 0 };
       const result = parseObservation(obs);
       expect(result).toEqual({
         id: '20240115_lpg',
@@ -86,9 +84,9 @@ describe('api.js', () => {
     it('should build URL without date filter', () => {
       const url = buildUrl();
       expect(url).toContain(CBS_BASE_URL);
-      expect(url).toContain('BenzineEuro95_1');
-      expect(url).toContain('Diesel_2');
-      expect(url).toContain('Lpg_3');
+      expect(url).toContain('A047220');
+      expect(url).toContain('A047219');
+      expect(url).toContain('A047221');
       expect(url).toContain('$orderby=Perioden asc');
       expect(url).not.toContain('Perioden ge');
     });
@@ -127,8 +125,8 @@ describe('api.js', () => {
       const mockFetch = createMockFetch([
         {
           value: [
-            { Perioden: '20240101', Measure: 'BenzineEuro95_1', Value: 1.95 },
-            { Perioden: '20240101', Measure: 'Diesel_2', Value: 1.85 },
+            { Perioden: '20240101', Measure: 'A047220', Value: 1.95 },
+            { Perioden: '20240101', Measure: 'A047219', Value: 1.85 },
           ],
         },
       ]);
@@ -142,11 +140,11 @@ describe('api.js', () => {
     it('should follow pagination links', async () => {
       const mockFetch = createMockFetch([
         {
-          value: [{ Perioden: '20240101', Measure: 'Diesel_2', Value: 1.85 }],
+          value: [{ Perioden: '20240101', Measure: 'A047219', Value: 1.85 }],
           '@odata.nextLink': 'https://next-page',
         },
         {
-          value: [{ Perioden: '20240102', Measure: 'Diesel_2', Value: 1.86 }],
+          value: [{ Perioden: '20240102', Measure: 'A047219', Value: 1.86 }],
         },
       ]);
 
@@ -158,7 +156,7 @@ describe('api.js', () => {
       const progressCalls = [];
       const mockFetch = createMockFetch([
         {
-          value: [{ Perioden: '20240315', Measure: 'BenzineEuro95_1', Value: 1.95 }],
+          value: [{ Perioden: '20240315', Measure: 'A047220', Value: 1.95 }],
         },
       ]);
 
@@ -191,9 +189,9 @@ describe('api.js', () => {
       const mockFetch = createMockFetch([
         {
           value: [
-            { Perioden: '20240101', Measure: 'BenzineEuro95_1', Value: 1.95 },
-            { Perioden: '20240101', Measure: 'Unknown_99', Value: 1.0 },
-            { Perioden: '20240101', Measure: 'Diesel_2', Value: null },
+            { Perioden: '20240101', Measure: 'A047220', Value: 1.95 },
+            { Perioden: '20240101', Measure: 'X999999', Value: 1.0 },
+            { Perioden: '20240101', Measure: 'A047219', Value: null },
           ],
         },
       ]);
@@ -216,9 +214,9 @@ describe('api.js', () => {
 
   describe('constants', () => {
     it('should export expected fuel names mapping', () => {
-      expect(FUEL_NAMES.BenzineEuro95_1).toBe('euro95');
-      expect(FUEL_NAMES.Diesel_2).toBe('diesel');
-      expect(FUEL_NAMES.Lpg_3).toBe('lpg');
+      expect(FUEL_NAMES.A047220).toBe('euro95');
+      expect(FUEL_NAMES.A047219).toBe('diesel');
+      expect(FUEL_NAMES.A047221).toBe('lpg');
     });
   });
 });

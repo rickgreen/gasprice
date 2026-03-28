@@ -54,8 +54,8 @@ describe('data.js', () => {
         ok: true,
         json: async () => ({
           value: [
-            { Perioden: '20240101', Measure: 'BenzineEuro95_1', Value: 1.95 },
-            { Perioden: '20240102', Measure: 'Diesel_2', Value: 1.85 },
+            { Perioden: '20240101', Measure: 'A047220', Value: 1.95 },
+            { Perioden: '20240102', Measure: 'A047219', Value: 1.85 },
           ],
         }),
       });
@@ -76,7 +76,7 @@ describe('data.js', () => {
         return {
           ok: true,
           json: async () => ({
-            value: [{ Perioden: '20240102', Measure: 'BenzineEuro95_1', Value: 1.96 }],
+            value: [{ Perioden: '20240102', Measure: 'A047220', Value: 1.96 }],
           }),
         };
       };
@@ -92,7 +92,7 @@ describe('data.js', () => {
       const mockFetch = async () => ({
         ok: true,
         json: async () => ({
-          value: [{ Perioden: '20240315', Measure: 'BenzineEuro95_1', Value: 1.95 }],
+          value: [{ Perioden: '20240315', Measure: 'A047220', Value: 1.95 }],
         }),
       });
 

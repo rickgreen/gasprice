@@ -5,16 +5,16 @@
  */
 
 /** @type {string} Base URL for CBS OData observations */
-const CBS_BASE_URL = 'https://datasets.cbs.nl/odata/v1/CBS/80416NED/Observations';
+const CBS_BASE_URL = 'https://datasets.cbs.nl/odata/v1/CBS/80416ned/Observations';
 
 /** @type {string[]} Measure codes for the three fuel types */
-const FUEL_MEASURES = ['BenzineEuro95_1', 'Diesel_2', 'Lpg_3'];
+const FUEL_MEASURES = ['A047220', 'A047219', 'A047221'];
 
 /** @type {Record<string, string>} Maps CBS measure codes to readable fuel names */
 const FUEL_NAMES = {
-  BenzineEuro95_1: 'euro95',
-  Diesel_2: 'diesel',
-  Lpg_3: 'lpg',
+  A047220: 'euro95',
+  A047219: 'diesel',
+  A047221: 'lpg',
 };
 
 /**

@@ -34,3 +34,6 @@ jobs:
 
       - name: Security audit
         run: npx better-npm-audit audit --level moderate
+
+      - name: Integration tests (CBS API)
+        run: npm run test:integration

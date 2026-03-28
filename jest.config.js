@@ -8,4 +8,5 @@ export default {
   },
   coveragePathIgnorePatterns: ['/node_modules/', '/tests/'],
   testMatch: ['**/tests/**/*.test.js'],
+  testPathIgnorePatterns: ['/node_modules/', '\\.integration\\.test\\.js$'],
 };
