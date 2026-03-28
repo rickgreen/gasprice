@@ -1,0 +1,42 @@
+---
+# Installs Nginx and deploys the gasprice vhost configuration.
+# The initial vhost serves HTTP only; the certbot role adds HTTPS later.
+
+- name: Install Nginx
+  ansible.builtin.apt:
+    name: nginx
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Remove default Nginx site
+  ansible.builtin.file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+  notify: Reload Nginx
+
+- name: Deploy gasprice Nginx vhost
+  ansible.builtin.template:
+    src: gasprice.nginx.conf.j2
+    dest: /etc/nginx/sites-available/gasprice.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Reload Nginx
+
+- name: Enable gasprice vhost
+  ansible.builtin.file:
+    src: /etc/nginx/sites-available/gasprice.conf
+    dest: /etc/nginx/sites-enabled/gasprice.conf
+    state: link
+  notify: Reload Nginx
+
+- name: Validate Nginx configuration
+  ansible.builtin.command: nginx -t
+  changed_when: false
+
+- name: Ensure Nginx is started and enabled
+  ansible.builtin.service:
+    name: nginx
+    state: started
+    enabled: true

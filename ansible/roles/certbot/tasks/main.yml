@@ -1,0 +1,57 @@
+---
+# Installs Certbot, obtains a Let's Encrypt certificate, deploys the
+# HTTPS Nginx vhost, and ensures automatic renewal via systemd timer.
+#
+# Tagged 'ssl' so it can be run separately after DNS propagation:
+#   ansible-playbook -i inventory.yml site.yml --tags ssl
+
+- name: Install Certbot and Nginx plugin
+  ansible.builtin.apt:
+    name:
+      - certbot
+      - python3-certbot-nginx
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+  tags: ssl
+
+- name: Check if certificate already exists
+  ansible.builtin.stat:
+    path: "/etc/letsencrypt/live/{{ domain }}/fullchain.pem"
+  register: cert_file
+  tags: ssl
+
+- name: Obtain Let's Encrypt certificate
+  ansible.builtin.command:
+    cmd: >-
+      certbot certonly
+      --nginx
+      --non-interactive
+      --agree-tos
+      --email {{ certbot_email }}
+      --domain {{ domain }}
+  when: not cert_file.stat.exists
+  notify: Reload Nginx
+  tags: ssl
+
+- name: Deploy HTTPS Nginx vhost with HSTS
+  ansible.builtin.template:
+    src: "{{ role_path }}/../nginx/templates/gasprice.nginx.ssl.conf.j2"
+    dest: /etc/nginx/sites-available/gasprice.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Reload Nginx
+  tags: ssl
+
+- name: Validate Nginx configuration
+  ansible.builtin.command: nginx -t
+  changed_when: false
+  tags: ssl
+
+- name: Ensure Certbot auto-renewal timer is enabled
+  ansible.builtin.systemd:
+    name: certbot.timer
+    state: started
+    enabled: true
+  tags: ssl

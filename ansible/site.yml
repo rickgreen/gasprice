@@ -1,0 +1,20 @@
+---
+# Main playbook — runs all roles to fully configure the VPS.
+#
+# Usage:
+#   ansible-playbook -i inventory.yml site.yml
+#
+# To run only SSL (after DNS propagation):
+#   ansible-playbook -i inventory.yml site.yml --tags ssl
+
+- name: Configure gasprice VPS
+  hosts: gasprice
+  become: true
+
+  vars_files:
+    - vars/gasprice.yml
+
+  roles:
+    - deploy_user
+    - nginx
+    - certbot

@@ -1,0 +1,18 @@
+# Managed by Ansible — do not edit manually on the server.
+#
+# Initial config: HTTP only, serving the static gasprice app.
+# After certbot runs, this file is replaced with the HTTPS version
+# by the certbot role (gasprice.nginx.ssl.conf.j2).
+
+server {
+    listen 80;
+    listen [::]:80;
+    server_name {{ domain }};
+
+    root {{ webroot }};
+    index index.html;
+
+    location / {
+        try_files $uri $uri/ =404;
+    }
+}

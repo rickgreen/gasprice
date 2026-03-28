@@ -1,0 +1,24 @@
+---
+# Creates a restricted deploy user with SSH access and ownership of the webroot.
+# GitHub Actions uses this user for rsync deploys.
+
+- name: Create deploy user
+  ansible.builtin.user:
+    name: "{{ deploy_user }}"
+    shell: /bin/bash
+    create_home: true
+    state: present
+
+- name: Add SSH authorized key for deploy user
+  ansible.posix.authorized_key:
+    user: "{{ deploy_user }}"
+    key: "{{ lookup('file', deploy_ssh_public_key_path) }}"
+    state: present
+
+- name: Create webroot directory
+  ansible.builtin.file:
+    path: "{{ webroot }}"
+    state: directory
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    mode: "0755"

@@ -1,0 +1,9 @@
+# Copy to terraform.tfvars and fill in the values.
+# terraform.tfvars is in .gitignore — never commit it.
+
+hcloud_token        = ""
+ssh_public_key_path = "~/.ssh/gasprice_deploy.pub"
+server_name         = "gasprice"
+server_type         = "cx22"
+server_location     = "nbg1"
+server_image        = "ubuntu-24.04"

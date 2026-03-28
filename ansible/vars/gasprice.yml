@@ -1,0 +1,14 @@
+---
+# Project-specific variables for the gasprice deployment.
+
+domain: gasprice.rickgreen.nl
+webroot: /var/www/gasprice
+deploy_user: deploy
+
+# SSH public key installed for the deploy user.
+# This is the same key used by GitHub Actions for rsync deploys.
+deploy_ssh_public_key_path: ~/.ssh/gasprice_deploy.pub
+
+# Email address for Let's Encrypt certificate registration.
+# Certbot sends expiry warnings to this address.
+certbot_email: ""

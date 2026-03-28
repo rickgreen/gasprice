@@ -3,3 +3,13 @@ coverage/
 .env
 *.log
 .DS_Store
+
+# Terraform
+terraform/.terraform/
+terraform/terraform.tfstate
+terraform/terraform.tfstate.backup
+terraform/*.tfvars
+terraform/.terraform.lock.hcl
+
+# Ansible
+ansible/*.retry
