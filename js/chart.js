@@ -24,39 +24,60 @@ const FUEL_LABELS = {
 const MARGIN = { top: 20, right: 20, bottom: 30, left: 50 };
 
 /**
+ * Calculates the number of days between two dates.
+ * @param {Date} start - Start date
+ * @param {Date} end - End date
+ * @returns {number} Number of days
+ */
+export function diffDays(start, end) {
+  return (end - start) / (1000 * 60 * 60 * 24);
+}
+
+/**
  * Determines the appropriate D3 time interval based on the visible time range.
+ * Prevents duplicate labels by choosing a granularity that fits the range.
  * @param {Date} start - Start of visible range
  * @param {Date} end - End of visible range
  * @returns {d3.CountableTimeInterval} Appropriate time interval for tick marks
  */
 export function getTimeInterval(start, end) {
-  const diffDays = (end - start) / (1000 * 60 * 60 * 24);
+  const days = diffDays(start, end);
 
-  if (diffDays <= 90) {
+  if (days <= 30) {
+    return d3.timeDay.every(2);
+  }
+  if (days <= 90) {
     return d3.timeWeek;
   }
-  if (diffDays <= 365) {
+  if (days <= 365) {
     return d3.timeMonth;
   }
-  if (diffDays <= 365 * 5) {
+  if (days <= 365 * 3) {
     return d3.timeMonth.every(3);
   }
-  return d3.timeYear;
+  if (days <= 365 * 8) {
+    return d3.timeYear;
+  }
+  return d3.timeYear.every(2);
 }
 
 /**
  * Formats a date according to the zoom level.
+ * Each level returns a unique label format to prevent duplicates.
  * @param {Date} start - Start of visible range
  * @param {Date} end - End of visible range
  * @returns {Function} D3 time format function
  */
 export function getTimeFormat(start, end) {
-  const diffDays = (end - start) / (1000 * 60 * 60 * 24);
+  const days = diffDays(start, end);
 
-  if (diffDays <= 90) {
+  if (days <= 30) {
     return d3.timeFormat('%d %b');
   }
-  if (diffDays <= 365 * 2) {
+  if (days <= 90) {
+    return d3.timeFormat('%d %b');
+  }
+  if (days <= 365 * 3) {
     return d3.timeFormat('%b %Y');
   }
   return d3.timeFormat('%Y');
@@ -87,7 +108,13 @@ function createTooltip(container) {
  * @param {Function} [options.onBrushUpdate] - Callback when external brush updates the domain
  * @returns {Object} Chart API with update methods
  */
-export function createMainChart({ containerId, data, visibleFuels, onBrushUpdate }) {
+export function createMainChart({
+  containerId,
+  data,
+  visibleFuels,
+  onBrushUpdate,
+  onDomainChange,
+}) {
   const container = document.getElementById(containerId);
   container.innerHTML = '';
 
@@ -120,9 +147,13 @@ export function createMainChart({ containerId, data, visibleFuels, onBrushUpdate
 
   const xScale = d3.scaleTime().domain(d3.extent(allDates)).range([0, innerWidth]);
 
+  const priceMin = d3.min(allPrices);
+  const priceMax = d3.max(allPrices);
+  const pricePadding = (priceMax - priceMin) * 0.05;
+
   const yScale = d3
     .scaleLinear()
-    .domain([0, d3.max(allPrices) * 1.05])
+    .domain([Math.max(0, priceMin - pricePadding), priceMax + pricePadding])
     .range([innerHeight, 0]);
 
   // Grid lines
@@ -230,36 +261,15 @@ export function createMainChart({ containerId, data, visibleFuels, onBrushUpdate
 
   /**
    * Updates the visible domain of the chart (called by navigator brush).
+   * Y-axis stays fixed on the historical min/max for visual comparability.
    * @param {[Date, Date]} domain - New time domain
    */
   function updateDomain(domain) {
     xScale.domain(domain);
-
-    // Recalculate y domain for visible data only
-    let minPrice = Infinity;
-    let maxPrice = -Infinity;
-    for (const fuel of Object.keys(data)) {
-      if (!visibleFuels.has(fuel)) {
-        continue;
-      }
-      for (const d of data[fuel]) {
-        if (d.date >= domain[0] && d.date <= domain[1]) {
-          if (d.price < minPrice) {
-            minPrice = d.price;
-          }
-          if (d.price > maxPrice) {
-            maxPrice = d.price;
-          }
-        }
-      }
-    }
-
-    if (minPrice !== Infinity) {
-      const padding = (maxPrice - minPrice) * 0.1 || 0.05;
-      yScale.domain([Math.max(0, minPrice - padding), maxPrice + padding]);
-    }
-
     render();
+    if (onDomainChange) {
+      onDomainChange(domain);
+    }
   }
 
   /**

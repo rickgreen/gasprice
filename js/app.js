@@ -10,6 +10,7 @@ import { loadPriceData, groupByFuel } from './data.js';
 import { createMainChart } from './chart.js';
 import { createNavigator } from './navigator.js';
 import { updatePriceCards } from './prices.js';
+import { formatDateDutch, computeHistoricalStats, computePeriodStats } from './stats.js';
 
 /** @type {string[]} Month names for loader display */
 const MONTH_NAMES = [
@@ -55,7 +56,13 @@ function setLoaderText(text) {
  * Shows the main UI sections after data has loaded.
  */
 function showUI() {
-  const sections = ['price-cards', 'fuel-toggles', 'chart-container', 'navigator-container'];
+  const sections = [
+    'price-cards',
+    'stats-section',
+    'fuel-toggles',
+    'chart-container',
+    'navigator-container',
+  ];
   for (const id of sections) {
     const el = document.getElementById(id);
     if (el) {
@@ -83,6 +90,81 @@ function formatProgress(info) {
 }
 
 /**
+ * Renders historical statistics into the DOM (one-time, does not change).
+ * @param {Record<string, {min: {date: Date, price: number}, max: {date: Date, price: number}}>} stats - Historical min/max per fuel
+ */
+function renderHistoricalStats(stats) {
+  const fuels = ['euro95', 'diesel', 'lpg'];
+  for (const fuel of fuels) {
+    const s = stats[fuel];
+    if (!s) {
+      continue;
+    }
+    const minEl = document.getElementById(`hist-min-${fuel}`);
+    const minDateEl = document.getElementById(`hist-min-date-${fuel}`);
+    const maxEl = document.getElementById(`hist-max-${fuel}`);
+    const maxDateEl = document.getElementById(`hist-max-date-${fuel}`);
+
+    if (minEl) {
+      minEl.textContent = `\u20AC${s.min.price.toFixed(3)}`;
+    }
+    if (minDateEl) {
+      minDateEl.textContent = formatDateDutch(s.min.date);
+    }
+    if (maxEl) {
+      maxEl.textContent = `\u20AC${s.max.price.toFixed(3)}`;
+    }
+    if (maxDateEl) {
+      maxDateEl.textContent = formatDateDutch(s.max.date);
+    }
+  }
+}
+
+/**
+ * Renders period statistics into the DOM. Called each time the navigator selection changes.
+ * @param {Record<string, {min: {date: Date, price: number}, max: {date: Date, price: number}}|null>} stats - Period min/max per fuel or null
+ */
+function renderPeriodStats(stats) {
+  const fuels = ['euro95', 'diesel', 'lpg'];
+  for (const fuel of fuels) {
+    const s = stats[fuel];
+    const minEl = document.getElementById(`period-min-${fuel}`);
+    const minDateEl = document.getElementById(`period-min-date-${fuel}`);
+    const maxEl = document.getElementById(`period-max-${fuel}`);
+    const maxDateEl = document.getElementById(`period-max-date-${fuel}`);
+
+    if (!s) {
+      if (minEl) {
+        minEl.textContent = '\u2014';
+      }
+      if (minDateEl) {
+        minDateEl.textContent = '';
+      }
+      if (maxEl) {
+        maxEl.textContent = '\u2014';
+      }
+      if (maxDateEl) {
+        maxDateEl.textContent = '';
+      }
+      continue;
+    }
+
+    if (minEl) {
+      minEl.textContent = `\u20AC${s.min.price.toFixed(3)}`;
+    }
+    if (minDateEl) {
+      minDateEl.textContent = formatDateDutch(s.min.date);
+    }
+    if (maxEl) {
+      maxEl.textContent = `\u20AC${s.max.price.toFixed(3)}`;
+    }
+    if (maxDateEl) {
+      maxDateEl.textContent = formatDateDutch(s.max.date);
+    }
+  }
+}
+
+/**
  * Initializes the application.
  * Loads data, renders charts, and sets up event listeners.
  */
@@ -106,14 +188,24 @@ async function init() {
     setLoaderVisible(false);
     showUI();
 
-    // Update price cards
+    // Update price cards with latest prices and dates
     updatePriceCards(groupedData);
+
+    // Compute and render historical stats (one-time)
+    const historicalStats = computeHistoricalStats(groupedData);
+    renderHistoricalStats(historicalStats);
 
     // Track which fuels are visible
     const visibleFuels = new Set(['euro95', 'diesel', 'lpg']);
 
     // Create charts
     let updateMainDomain;
+
+    /** @param {[Date, Date]} domain - The new visible time range */
+    const handleDomainChange = (domain) => {
+      const periodStats = computePeriodStats(groupedData, domain[0], domain[1]);
+      renderPeriodStats(periodStats);
+    };
 
     const mainChart = createMainChart({
       containerId: 'main-chart',
@@ -122,6 +214,7 @@ async function init() {
       onBrushUpdate: (fn) => {
         updateMainDomain = fn;
       },
+      onDomainChange: handleDomainChange,
     });
 
     const navigator = createNavigator({
