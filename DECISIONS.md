@@ -82,3 +82,27 @@ GitHub Pages (beperkte controle over infrastructuur).
 Alle data is read-only.
 
 **Motivatie:** Er valt hier simpelweg niets te schrijven - de CBS API ondersteunt alleen lezen.
+
+---
+
+## 2026-03-27 - ESM modules met Jest
+
+**Keuze:** ES modules (`"type": "module"` in package.json) met `--experimental-vm-modules` voor Jest.
+
+**Motivatie:** De browser-code gebruikt native ES modules (`import`/`export`). Om dezelfde
+bestanden zonder transpilatie in Jest te testen is de experimentele VM modules vlag nodig.
+Dit voorkomt een Babel/transpiler dependency. Het risico is beperkt: als Node de vlag
+verwijdert of wijzigt, is de impact alleen op de testrunner, niet op de productie-app.
+
+**Bewust niet gekozen:** CommonJS (zou dubbele module syntax vereisen), Babel/ts-jest
+(extra build-complexiteit voor een vanillaproject).
+
+---
+
+## 2026-03-28 - Eerste deploy zonder domeinnaam
+
+**Keuze:** De app draait voorlopig op het IP-adres (204.168.178.129) zonder domeinnaam of HTTPS.
+
+**Motivatie:** De focus van Fase 5 is een werkende CI/CD pipeline. HTTPS vereist een domeinnaam
+(voor Let's Encrypt) of een self-signed cert dat browserwaarschuwingen geeft. Domein en HTTPS
+kunnen in een latere iteratie worden toegevoegd zonder architectuurwijzigingen.

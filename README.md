@@ -1,78 +1,80 @@
-# Gasprice
+# Brandstofprijzen Nederland
 
-Statische webapp die 20 jaar aan Nederlandse pompprijzen visualiseert met D3.js.
-Data komt van de CBS Open Data API (tabel 80416NED), gratis en zonder registratie.
+Interactieve visualisatie van 20 jaar Nederlandse pompprijzen (Euro 95, Diesel, LPG) met data van het CBS.
 
-## Wat doet het
+**Live:** [http://204.168.178.129](http://204.168.178.129)
 
-- Toont de meest recente pompprijzen voor Euro95, diesel en LPG
-- Interactieve D3 lijndiagram met data vanaf 1 januari 2006
-- Tijdranges instelbaar: 1M, 3M, 1J, 5J, 10J of alles
-- Per brandstof aan/uitzetten
-- Hover tooltip met exacte datum en prijs
-- Annotaties op historische momenten (piek 2022, accijnskorting, etc.)
+## Features
 
-## Technische stack
+- D3.js lijndiagram met automatisch schaalende tijdas
+- Navigator (mini-overview) met sleepbare selectie
+- Brandstofsoorten individueel aan/uitzetten
+- IndexedDB caching: eerste bezoek haalt alle data op, daarna alleen incrementeel
+- Hover tooltip met exacte datum en prijs per brandstof
+- Donker thema, responsive design
 
-- Statische HTML/CSS/JS - geen framework, geen build-stap
-- D3.js v7 (CDN)
-- CBS OData v4 API
+## Stack
+
+- Vanilla JavaScript (ES2022, geen framework, geen bundler)
+- D3.js v7 via CDN
+- IndexedDB via [idb](https://github.com/jakearchibald/idb)
+- CBS OData v4 API (tabel 80416NED)
 - Nginx op Hetzner VPS
+- GitHub Actions CI/CD (rsync deploy)
 
-## Lokaal draaien
-
-Omdat de app fetch() gebruikt, heb je een lokale webserver nodig
-(browsers blokkeren fetch() op file:// URLs).
+## Lokale setup
 
 ```bash
-# Python (standaard beschikbaar op macOS/Linux)
+git clone git@github.com:rickgreen/gasprice.git
 cd gasprice
-python3 -m http.server 8080
-# open http://localhost:8080
+npm install
+```
+
+Lokaal testen:
+
+```bash
+npm test              # Jest tests met coverage
+npx eslint js/**/*.js # Lint
+npx prettier --check '**/*.{js,json,css,html,md}'  # Format check
+```
+
+Open `index.html` via een lokale server (fetch vereist HTTP):
+
+```bash
+npx serve .
 ```
 
 ## Deploy
 
-Elke push naar `main` triggert automatisch een deploy via GitHub Actions.
-Zie `.github/workflows/deploy.yml` voor de pipeline.
+Elke push naar `main` triggert automatisch:
+
+1. Lint (ESLint + Prettier)
+2. Tests (Jest, coverage > 80%)
+3. Security audit (better-npm-audit)
+4. Deploy via rsync naar de VPS
 
 ### Benodigde GitHub Secrets
 
-Stel deze in via: Repository → Settings → Secrets and variables → Actions
-
-| Secret            | Inhoud                                          |
-| ----------------- | ----------------------------------------------- |
-| `SSH_PRIVATE_KEY` | Private SSH key voor toegang tot de VPS         |
-| `VPS_HOST`        | IP-adres of hostname van de Hetzner VPS         |
-| `VPS_USER`        | SSH gebruikersnaam (bijv. `deploy`)             |
-| `VPS_PATH`        | Absoluut pad op VPS (bijv. `/var/www/gasprice`) |
+| Secret            | Inhoud                                  |
+| ----------------- | --------------------------------------- |
+| `SSH_PRIVATE_KEY` | Private SSH key voor toegang tot de VPS |
+| `VPS_HOST`        | IP-adres of hostname van de VPS         |
+| `VPS_USER`        | SSH gebruikersnaam                      |
+| `VPS_PATH`        | Absoluut pad op VPS                     |
 
 ### VPS setup (eenmalig)
 
 ```bash
-# Op de Hetzner VPS:
 sudo apt update && sudo apt install -y nginx
-
-# Webroot aanmaken
 sudo mkdir -p /var/www/gasprice
 sudo chown $USER:$USER /var/www/gasprice
-
-# Nginx configureren - zie docs/nginx.conf
 ```
-
-## CBS API - measure-codes valideren
-
-Bij de eerste keer draaien logt de app de ontvangen CBS measure-codes
-naar de browser console. Gebruik dit om `FUEL_CONFIG` in `js/app.js`
-te valideren en eventueel aan te passen.
-
-Je kunt ook `validateData()` aanroepen vanuit de browser console
-nadat de data geladen is.
 
 ## Data
 
-- Bron: CBS StatLine tabel 80416NED
-- Inhoud: gewogen gemiddelde dagprijzen Euro95, diesel, LPG
-- Frequentie: dagelijkse meting, wekelijks gepubliceerd
-- Beschikbaar vanaf: 1 januari 2006
-- Licentie: CC BY 4.0
+Bron: [CBS Open Data](https://opendata.cbs.nl) — tabel 80416NED (Pompprijzen motorbrandstoffen per dag).
+Beschikbaar vanaf 1 januari 2006. Licentie: CC BY 4.0.
+
+## Licentie
+
+MIT
