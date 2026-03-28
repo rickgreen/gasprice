@@ -34,13 +34,14 @@ of de projectstatus veranderen.
 
 ## CBS API
 
-Endpoint: `https://datasets.cbs.nl/odata/v1/CBS/80416NED/Observations`
+Endpoint: `https://datasets.cbs.nl/odata/v1/CBS/80416ned/Observations`
+Let op: tabel-ID is **lowercase** (`80416ned`, niet `80416NED`).
 
-Measure-codes (bevestigd):
+Measure-codes (bevestigd via OData v4 MeasureCodes endpoint):
 
-- `BenzineEuro95_1` - Euro 95
-- `Diesel_2` - Diesel
-- `Lpg_3` - LPG
+- `A047220` - Euro 95 (Benzine Euro95)
+- `A047219` - Diesel
+- `A047221` - LPG
 
 Datum formaat in `Perioden`: `YYYYMMDD` (string zonder koppeltekens)
 Prijs in euro per liter, inclusief BTW en accijns.

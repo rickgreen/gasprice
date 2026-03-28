@@ -106,3 +106,30 @@ verwijdert of wijzigt, is de impact alleen op de testrunner, niet op de producti
 **Motivatie:** De focus van Fase 5 is een werkende CI/CD pipeline. HTTPS vereist een domeinnaam
 (voor Let's Encrypt) of een self-signed cert dat browserwaarschuwingen geeft. Domein en HTTPS
 kunnen in een latere iteratie worden toegevoegd zonder architectuurwijzigingen.
+
+---
+
+## 2026-03-28 - CBS OData v4 endpoint met interne measure codes
+
+**Keuze:** Gebruik `datasets.cbs.nl/odata/v1/CBS/80416ned` (lowercase) met interne
+measure codes (`A047220`, `A047219`, `A047221`).
+
+**Motivatie:** De CBS OData v4 API op `datasets.cbs.nl` is case-sensitive op de tabel-ID
+en gebruikt interne identifiers in plaats van de beschrijvende namen uit de v3 API
+(`opendata.cbs.nl`). De v4 API is de actief onderhouden versie. De mapping naar leesbare
+namen (`euro95`, `diesel`, `lpg`) gebeurt in `FUEL_NAMES` in `js/api.js`.
+
+**Bewust niet gekozen:** OData v3 endpoint (`opendata.cbs.nl/ODataApi/odata/80416NED`) —
+oudere API, andere response structuur, onzekere toekomst.
+
+---
+
+## 2026-03-28 - Integratietests gescheiden van unit tests
+
+**Keuze:** Twee Jest configuraties: `jest.config.js` (unit, jsdom) en
+`jest.integration.config.js` (integratie, node). Pre-commit draait alleen unit tests.
+CI draait beide.
+
+**Motivatie:** Unit tests moeten snel en offline zijn voor de pre-commit hook.
+Integratietests raken het netwerk (CBS API) en zijn trager en minder deterministisch.
+De scheiding voorkomt dat een tijdelijke CBS-storing commits blokkeert.
